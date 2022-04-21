@@ -43,10 +43,11 @@ def main(args):
     else:
         train_loader, val_loader = get_cifarloaders(args)
 
-    best_acc = Max()
+    best_acc = Max(type='cpu')
 
     if args.validate:
         validate(model, val_loader, best_acc, args)
+        pprint()
         return
 
     _continuous = args.continuous

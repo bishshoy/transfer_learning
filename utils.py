@@ -4,7 +4,7 @@ import torch.distributed as dist
 from torch.distributed import ReduceOp, all_reduce
 
 
-def pprint(*x, end):
+def pprint(*x, end='\n'):
     if dist.get_rank() == 0:
         print(*x, end=end)
 
@@ -33,37 +33,61 @@ def replace_fc_layer(model, args):
 
 
 class Average:
-    def __init__(self):
-        self.x = torch.zeros(1).cuda()
-        self.N = torch.zeros(1).cuda()
+    def __init__(self, type='cuda'):
+        assert type in ['cuda', 'cpu'], 'type must be "cuda" or "cpu"'
+        self.type = type
+
+        self.x = torch.zeros(1)
+        self.N = torch.zeros(1)
+
+        if type == 'cuda':
+            self.x = self.x.cuda()
+            self.N = self.N.cuda()
 
     def __call__(self, x):
-        all_reduce(x)
-        x /= dist.get_world_size()
+        if self.type == 'cuda' and dist.is_initialized():
+            all_reduce(x)
+            x /= dist.get_world_size()
+
         self.x += x
         self.N += 1
 
     def compute(self):
-        return self.x / self.N
+        return (self.x / self.N).item()
 
 
 class Max:
-    def __init__(self):
-        self.x = torch.zeros(1).cuda()
+    def __init__(self, type='cuda'):
+        assert type in ['cuda', 'cpu'], 'type must be "cuda" or "cpu"'
+        self.type = type
+
+        self.x = torch.zeros(1)
+
+        if type == 'cuda':
+            self.x = self.x.cuda()
 
     def __call__(self, x):
-        all_reduce(x, op=ReduceOp.MAX)
-        if self.x[0] < x[0]:
-            self.x[0] = x[0]
+        if self.type == 'cuda' and dist.is_initialized():
+            all_reduce(x, op=ReduceOp.MAX)
+
+        if self.x[0] < x:
+            self.x[0] = x
 
     def compute(self):
-        return self.x
+        return self.x.item()
 
 
 class Accuracy:
-    def __init__(self):
-        self.correct = torch.zeros(1).cuda()
-        self.N = torch.zeros(1).cuda()
+    def __init__(self, type='cuda'):
+        assert type in ['cuda', 'cpu'], 'type must be "cuda" or "cpu"'
+        self.type = type
+
+        self.correct = torch.zeros(1)
+        self.N = torch.zeros(1)
+
+        if type == 'cuda':
+            self.correct = self.correct.cuda()
+            self.N = self.N.cuda()
 
     def __call__(self, output, target):
         self.correct += (output.argmax(dim=-1) == target).sum()
@@ -71,6 +95,9 @@ class Accuracy:
 
     def compute(self):
         correct, N = self.correct.clone(), self.N.clone()
-        all_reduce(correct)
-        all_reduce(N)
-        return correct / N
+
+        if self.type == 'cuda' and dist.is_initialized():
+            all_reduce(correct)
+            all_reduce(N)
+
+        return (correct / N).item()
