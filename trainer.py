@@ -1,11 +1,12 @@
 import torch.distributed as dist
+from torch.cuda.amp import autocast
 import datetime
 import time
 
 from utils import *
 
 
-def train_one_epoch(model, loss_fn, optim, train_loader, epoch, args):
+def train_one_epoch(model, loss_fn, scaler, optim, train_loader, epoch, args):
     dist.barrier()
     model.train()
 
@@ -16,13 +17,17 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, args):
 
     for i, (data, target) in enumerate(train_loader):
         data, target = data.cuda(), target.cuda()
+        data = data.to(memory_format=torch.channels_last)
 
         optim.zero_grad()
 
-        output = model(data)
-        loss = loss_fn(output, target)
-        loss.backward()
-        optim.step()
+        with autocast():
+            output = model(data)
+            loss = loss_fn(output, target)
+
+        scaler.scale(loss).backward()
+        scaler.step(optim)
+        scaler.update()
 
         avg_loss(loss)
         acc(output, target)

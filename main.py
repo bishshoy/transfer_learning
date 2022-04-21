@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.cuda.amp import GradScaler
 
 from icecream import ic
 import random
@@ -35,6 +36,7 @@ def main(args):
 
     model = DDP(model.cuda(), device_ids=[args.rank], output_device=args.rank)
     loss_fn = nn.CrossEntropyLoss()
+    scaler = GradScaler()
     optim = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom, weight_decay=args.wd, nesterov=True)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args.epochs)
 
@@ -53,7 +55,7 @@ def main(args):
     _continuous = args.continuous
 
     for epoch in range(args.epochs):
-        train_one_epoch(model, loss_fn, optim, train_loader, epoch, args)
+        train_one_epoch(model, loss_fn, scaler, optim, train_loader, epoch, args)
 
         if _continuous == 1 or epoch == args.epochs - 1:
             validate(model, val_loader, best_acc, args)
