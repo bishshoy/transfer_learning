@@ -1,31 +1,33 @@
-import torch
-import torchvision as T
+from torchvision import transforms
+from torchvision.datasets import ImageNet, CIFAR10, CIFAR100
+from torch.utils.data import DataLoader
 
 
 def get_imagenetloaders(args):
-    train_dataset = T.datasets.ImageNet('/imagenet', split='train',
-                                        transform=T.transforms.Compose([
-                                            T.transforms.RandomResizedCrop(224),
-                                            T.transforms.RandomHorizontalFlip(),
-                                            T.transforms.ToTensor(),
-                                            T.transforms.Normalize(
+    train_dataset = ImageNet('/imagenet', split='train',
+                             transform=transforms.Compose([
+                                 transforms.RandomResizedCrop(224),
+                                 transforms.RandomHorizontalFlip(),
+                                 transforms.ToTensor(),
+                                 transforms.Normalize(
                                                 (0.485, 0.456, 0.406),
                                                 (0.229, 0.224, 0.225)),
-                                        ]))
-    val_dataset = T.datasets.ImageNet('/imagenet', split='val',
-                                      transform=T.transforms.Compose([
-                                          T.transforms.Resize(256),
-                                          T.transforms.CenterCrop(224),
-                                          T.transforms.ToTensor(),
-                                          T.transforms.Normalize(
+                             ]))
+    val_dataset = ImageNet('/imagenet', split='val',
+                           transform=transforms.Compose([
+                               transforms.Resize(256),
+                               transforms.CenterCrop(224),
+                               transforms.ToTensor(),
+                               transforms.Normalize(
                                               (0.485, 0.456, 0.406),
                                               (0.229, 0.224, 0.225)),
-                                      ]))
+                           ]))
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size,
-                                               shuffle=True, num_workers=14, pin_memory=True)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size,
-                                             shuffle=False, num_workers=14, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
+                              shuffle=True, num_workers=14, pin_memory=True)
+
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size,
+                            shuffle=False, num_workers=14, pin_memory=True)
 
     return train_loader, val_loader
 
@@ -33,37 +35,37 @@ def get_imagenetloaders(args):
 def get_cifarloaders(args):
 
     if args.cifar == 10:
-        dataset = T.datasets.CIFAR10
+        dataset = CIFAR10
         root = '/cifar10'
     else:
-        dataset = T.datasets.CIFAR100
+        dataset = CIFAR100
         root = '/cifar100'
 
-    normalize = T.transforms.Normalize((0.50707516, 0.48654887, 0.44091784),
-                                       (0.26733429, 0.25643846, 0.27615047))
+    normalize = transforms.Normalize((0.50707516, 0.48654887, 0.44091784),
+                                     (0.26733429, 0.25643846, 0.27615047))
 
     if args.upscale_images:
-        train_transforms = T.transforms.Compose([
-            T.transforms.RandomHorizontalFlip(),
-            T.transforms.Resize(224),
-            T.transforms.RandomCrop(240, 16),
-            T.transforms.ToTensor(),
+        train_transforms = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.Resize(224),
+            transforms.RandomCrop(240, 16),
+            transforms.ToTensor(),
             normalize,
         ])
-        val_transforms = T.transforms.Compose([
-            T.transforms.Resize(224),
-            T.transforms.ToTensor(),
+        val_transforms = transforms.Compose([
+            transforms.Resize(224),
+            transforms.ToTensor(),
             normalize,
         ])
     else:
-        train_transforms = T.transforms.Compose([
-            T.transforms.RandomHorizontalFlip(),
-            T.transforms.RandomCrop(32, 4),
-            T.transforms.ToTensor(),
+        train_transforms = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(32, 4),
+            transforms.ToTensor(),
             normalize,
         ])
-        val_transforms = T.transforms.Compose([
-            T.transforms.ToTensor(),
+        val_transforms = transforms.Compose([
+            transforms.ToTensor(),
             normalize,
         ])
 
@@ -71,12 +73,10 @@ def get_cifarloaders(args):
 
     val_dataset = dataset(root, train=False, transform=val_transforms, download=False)
 
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=14, pin_memory=True,
-        persistent_workers=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
+                              num_workers=14, pin_memory=True, persistent_workers=True)
 
-    val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=14, pin_memory=True,
-        persistent_workers=True)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False,
+                            num_workers=14, pin_memory=True, persistent_workers=True)
 
     return train_loader, val_loader

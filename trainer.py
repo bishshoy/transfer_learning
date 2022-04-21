@@ -1,4 +1,4 @@
-import torchmetrics
+from torchmetrics import MeanMetric, Accuracy
 import datetime
 import time
 
@@ -8,10 +8,9 @@ from utils import *
 def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
     model.train()
 
-    avg_loss = torchmetrics.MeanMetric()
-    acc = torchmetrics.Accuracy()
-
-    ips = torchmetrics.MeanMetric()
+    avg_loss = MeanMetric()
+    ips = MeanMetric()
+    acc = Accuracy()
 
     for i, (data, target) in enumerate(train_loader):
         tic = time.time()
@@ -50,7 +49,7 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
 def validate(model, val_loader, best_acc):
     model.eval()
 
-    acc = torchmetrics.Accuracy()
+    acc = Accuracy()
 
     for data, target in val_loader:
         data, target = data.cuda(), target.cuda()

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-import torchmetrics
+
+from torchmetrics import MaxMetric
 from icecream import ic
 
 from models import *
@@ -25,7 +26,7 @@ def main(args):
             print(param.shape, param.requires_grad)
         exit()
 
-    model = torch.nn.DataParallel(model)
+    model = nn.DataParallel(model)
     optim = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom, weight_decay=args.wd, nesterov=True)
     loss_fn = nn.CrossEntropyLoss()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args.epochs)
@@ -39,7 +40,7 @@ def main(args):
         validate(model, val_loader)
         return
 
-    best_acc = torchmetrics.MaxMetric()
+    best_acc = MaxMetric()
     _continuous = args.continuous
     for epoch in range(args.epochs):
         train_one_epoch(model, loss_fn, optim, train_loader, epoch, args.epochs)
