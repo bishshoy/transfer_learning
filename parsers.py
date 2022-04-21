@@ -7,7 +7,7 @@ def get_args():
     parser.add_argument('--pretrained', action='store_true')
     parser.add_argument('--print-model', action='store_true')
 
-    parser.add_argument('--batch-size', type=int, default=256)
+    parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--epochs', type=int)
     parser.add_argument('--continuous', type=int, default=5)
 

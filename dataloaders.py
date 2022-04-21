@@ -1,6 +1,7 @@
 from torchvision import transforms
 from torchvision.datasets import ImageNet, CIFAR10, CIFAR100
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 
 def get_imagenetloaders(args):
@@ -70,13 +71,14 @@ def get_cifarloaders(args):
         ])
 
     train_dataset = dataset(root, train=True, transform=train_transforms, download=False)
-
     val_dataset = dataset(root, train=False, transform=val_transforms, download=False)
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
-                              num_workers=14, pin_memory=True, persistent_workers=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
+                              num_workers=14, pin_memory=True, persistent_workers=True,
+                              sampler=DistributedSampler(train_dataset))
 
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False,
-                            num_workers=14, pin_memory=True, persistent_workers=True)
+                            num_workers=14, pin_memory=True, persistent_workers=True,
+                            sampler=DistributedSampler(val_dataset))
 
     return train_loader, val_loader
