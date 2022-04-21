@@ -31,8 +31,9 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
         toc = time.time()
 
         if i != 0:
-            ips(len(data) / (toc - tic))
-            eta = (total_epochs - epoch) * len(train_loader) * len(data) / ips.compute().item() / 3600.0
+            if i != len(train_loader) - 1:
+                ips(len(data) / (toc - tic))
+                eta = (total_epochs - epoch) * len(train_loader) * len(data) / ips.compute().item() / 3600.0
 
             print(
                 '\r[ {epoch:3}: {iter_a:3}/ {iter_b:3}]  LR:{lr:7.4f}  Loss:{loss:6.3f}  IPS:{ips:5.0f}  ETA: {eta}  Acc:{acc:6.2f}'
