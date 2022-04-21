@@ -53,6 +53,8 @@ class Average:
         self.N += 1
 
     def compute(self):
+        if self.N == 0:
+            return 0
         return (self.x / self.N).item()
 
 
@@ -100,4 +102,6 @@ class Accuracy:
             all_reduce(correct)
             all_reduce(N)
 
+        if N == 0:
+            return 0
         return (correct / N).item()
