@@ -13,9 +13,11 @@ def train_one_epoch(model, loss_fn, scaler, optim, train_loader, epoch, args):
     avg_loss = Average()
     acc = Accuracy()
     ips = Average(type='cpu')
-    tic = time.time()
 
     for i, (data, target) in enumerate(train_loader):
+        if i != 0:
+            tic = time.time()
+
         data, target = data.cuda(), target.cuda()
         data = data.to(memory_format=torch.channels_last)
 
