@@ -42,9 +42,10 @@ def main(args):
     best_acc = torchmetrics.MaxMetric()
     _continuous = args.continuous
     for epoch in range(args.epochs):
-        train_one_epoch(model, loss_fn, optim, train_loader, epoch)
+        train_one_epoch(model, loss_fn, optim, train_loader, epoch, args.epochs)
         if _continuous == 1 or epoch == args.epochs - 1:
             validate(model, val_loader, best_acc)
+            print()
             _continuous = args.continuous + 1
         _continuous -= 1
         scheduler.step()
