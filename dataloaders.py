@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 
 def get_imagenetloaders(args):
-    train_dataset = ImageNet(args.dataset_root, split='train',
+    train_dataset = ImageNet(args.droot, split='train',
                              transform=transforms.Compose([
                                  transforms.RandomResizedCrop(224),
                                  transforms.RandomHorizontalFlip(),
@@ -13,7 +13,7 @@ def get_imagenetloaders(args):
                                      (0.485, 0.456, 0.406),
                                      (0.229, 0.224, 0.225)),
                              ]))
-    val_dataset = ImageNet(args.dataset_root, split='val',
+    val_dataset = ImageNet(args.droot, split='val',
                            transform=transforms.Compose([
                                transforms.Resize(256),
                                transforms.CenterCrop(224),
@@ -67,9 +67,9 @@ def get_cifarloaders(args):
             normalize,
         ])
 
-    train_dataset = dataset(args.dataset_root, train=True, transform=train_transforms, download=True)
+    train_dataset = dataset(args.droot, train=True, transform=train_transforms, download=True)
 
-    val_dataset = dataset(args.dataset_root, train=False, transform=val_transforms, download=True)
+    val_dataset = dataset(args.droot, train=False, transform=val_transforms, download=True)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                               num_workers=14, pin_memory=True, persistent_workers=True)

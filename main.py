@@ -47,6 +47,8 @@ def main(args):
         if _continuous == 1 or epoch == args.epochs - 1:
             validate(model, val_loader, best_acc)
             print()
+            if args.check_hyp:
+                return
             _continuous = args.continuous + 1
         _continuous -= 1
         scheduler.step()

@@ -15,7 +15,7 @@ def get_args():
     parser.add_argument('--mom', type=float, default=0.9)
     parser.add_argument('--wd', type=float, default=5e-4)
 
-    parser.add_argument('--dataset-root', type=str)
+    parser.add_argument('--droot', type=str)
     parser.add_argument('--cifar', type=int)
     parser.add_argument('--imagenet', action='store_true')
 
@@ -25,5 +25,6 @@ def get_args():
     parser.add_argument('--replace-fc', action='store_true')
 
     parser.add_argument('--upscale-images', action='store_true')
+    parser.add_argument('--check-hyp', action='store_true')
 
     return parser.parse_args()
