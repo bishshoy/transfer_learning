@@ -1,3 +1,8 @@
 __pycache__
 .vscode
 datasets
+cifar10
+cifar100
+*.sh
+*.txt
+log
