@@ -29,6 +29,7 @@ python main.py \
 --pretrained \
 --epochs 200 \
 --lr 1e-2 \
---cifar 10 \
+--cifar 100 \
+--dataset-root datasets/cifar100 \
 --replace-fc \
 

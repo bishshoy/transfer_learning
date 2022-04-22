@@ -15,6 +15,7 @@ def get_args():
     parser.add_argument('--mom', type=float, default=0.9)
     parser.add_argument('--wd', type=float, default=5e-4)
 
+    parser.add_argument('--dataset-root', type=str)
     parser.add_argument('--cifar', type=int)
     parser.add_argument('--imagenet', action='store_true')
 

@@ -4,23 +4,23 @@ from torch.utils.data import DataLoader
 
 
 def get_imagenetloaders(args):
-    train_dataset = ImageNet('/imagenet', split='train',
+    train_dataset = ImageNet(args.dataset_root, split='train',
                              transform=transforms.Compose([
                                  transforms.RandomResizedCrop(224),
                                  transforms.RandomHorizontalFlip(),
                                  transforms.ToTensor(),
                                  transforms.Normalize(
-                                                (0.485, 0.456, 0.406),
-                                                (0.229, 0.224, 0.225)),
+                                     (0.485, 0.456, 0.406),
+                                     (0.229, 0.224, 0.225)),
                              ]))
-    val_dataset = ImageNet('/imagenet', split='val',
+    val_dataset = ImageNet(args.dataset_root, split='val',
                            transform=transforms.Compose([
                                transforms.Resize(256),
                                transforms.CenterCrop(224),
                                transforms.ToTensor(),
                                transforms.Normalize(
-                                              (0.485, 0.456, 0.406),
-                                              (0.229, 0.224, 0.225)),
+                                   (0.485, 0.456, 0.406),
+                                   (0.229, 0.224, 0.225)),
                            ]))
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
@@ -36,10 +36,8 @@ def get_cifarloaders(args):
 
     if args.cifar == 10:
         dataset = CIFAR10
-        root = '/cifar10'
     else:
         dataset = CIFAR100
-        root = '/cifar100'
 
     normalize = transforms.Normalize((0.50707516, 0.48654887, 0.44091784),
                                      (0.26733429, 0.25643846, 0.27615047))
@@ -69,9 +67,9 @@ def get_cifarloaders(args):
             normalize,
         ])
 
-    train_dataset = dataset(root, train=True, transform=train_transforms, download=False)
+    train_dataset = dataset(args.dataset_root, train=True, transform=train_transforms, download=True)
 
-    val_dataset = dataset(root, train=False, transform=val_transforms, download=False)
+    val_dataset = dataset(args.dataset_root, train=False, transform=val_transforms, download=True)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                               num_workers=14, pin_memory=True, persistent_workers=True)
