@@ -73,7 +73,7 @@ def clean():
     print()
 
     file = open('.ids', 'w+')
-    file.writelines('\n'.join(keep))
+    file.writelines('\n'.join(keep)+'\n')
     file.close()
 
 
