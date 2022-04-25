@@ -13,6 +13,7 @@ from parsers import *
 
 def experiment(args):
     torch.backends.cudnn.benchmark = True
+    print(torch.cuda.get_device_name(0))
 
     model = build_model(args)
     model.cuda()
