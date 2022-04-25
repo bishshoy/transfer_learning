@@ -84,7 +84,7 @@ def create_launch_scripts(args):
 
 
 def create_job(launch_script, script_id):
-    cmd = 'qsub -P ee -o /dev/null -e /dev/null -lselect=1:ncpus=1:ngpus=1'
+    cmd = 'qsub -P ee -o /dev/null -e /dev/null -lselect=1:ncpus=1:ngpus=1:centos=skylake'
     cmd += ' -N '+str(script_id)
     cmd += ' '+launch_script
 
