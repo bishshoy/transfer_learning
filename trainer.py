@@ -44,6 +44,8 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
                     eta=str(datetime.timedelta(hours=eta)).rsplit(':', 1)[0],
                     acc=100 * acc.compute(),),
                 end='')
+    
+    return avg_loss.compute()
 
 
 def validate(model, val_loader, best_acc):

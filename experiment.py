@@ -11,9 +11,13 @@ from utils import *
 from parsers import *
 
 
-def main(args):
+def experiment(args):
+    torch.backends.cudnn.benchmark = True
+
     model = build_model(args)
     model.cuda()
+
+    train_loader, val_loader = get_dataloaders(args)  # Sets args.num_classes
 
     if args.freeze_conv:
         freeze_conv_layers(model, args)
@@ -31,11 +35,6 @@ def main(args):
     loss_fn = nn.CrossEntropyLoss()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args.epochs)
 
-    if args.imagenet:
-        train_loader, val_loader = get_imagenetloaders(args)
-    else:
-        train_loader, val_loader = get_cifarloaders(args)
-
     if args.validate:
         validate(model, val_loader)
         return
@@ -43,7 +42,7 @@ def main(args):
     best_acc = MaxMetric()
     _continuous = args.continuous
     for epoch in range(args.epochs):
-        train_one_epoch(model, loss_fn, optim, train_loader, epoch, args.epochs)
+        train_loss = train_one_epoch(model, loss_fn, optim, train_loader, epoch, args.epochs)
         if _continuous == 1 or epoch == args.epochs - 1:
             validate(model, val_loader, best_acc)
             print()
@@ -53,9 +52,14 @@ def main(args):
         _continuous -= 1
         scheduler.step()
 
+    return {
+        'train_loss': train_loss,
+        'best_acc': best_acc.compute(),
+    }
+
 
 if __name__ == '__main__':
-    torch.backends.cudnn.benchmark = True
-    args = get_args()
+    args = parse()
     ic(vars(args))
-    main(args)
+
+    experiment(args)

@@ -16,9 +16,9 @@ def freeze_conv_layers(model, args):
 def replace_fc_layer(model, args):
     if args.model == 'vgg16' or args.model == 'vgg16_bn':
         model.classifier[6] = nn.Linear(in_features=model.classifier[6].in_features,
-                                        out_features=args.cifar, bias=True)
+                                        out_features=args.num_classes, bias=True)
     elif args.model == 'resnet18':
         model.fc = nn.Linear(in_features=model.fc.in_features,
-                             out_features=args.cifar, bias=True)
+                             out_features=args.num_classes, bias=True)
 
     model.to('cuda')
