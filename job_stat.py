@@ -1,5 +1,7 @@
 import argparse
 import subprocess
+from glob import glob
+import os
 
 
 def parse():
@@ -8,6 +10,7 @@ def parse():
     parser.add_argument('--watch', action='store_true')
     parser.add_argument('--logs', action='store_true')
     parser.add_argument('--clean', action='store_true')
+    parser.add_argument('--stop-all', action='store_true')
 
     args = parser.parse_args()
     return args
@@ -36,7 +39,28 @@ def watch_qstat():
 
 
 def view_logs():
+    files = sorted(glob('logs/*'))
+
+    for f in files:
+        cmd = 'cat ' + f
+        os.system(cmd)
+
+
+def stop_all():
     lines = open('.ids', 'r').read().strip().split('\n')
+
+    for l in lines:
+        job_id = l.strip().split(',')[0]
+
+        cmd = 'qdel '+job_id
+        print(cmd)
+
+        try:
+            os.system(cmd)
+        except:
+            pass
+
+        print()
 
 
 def clean():
@@ -85,6 +109,8 @@ def main(args):
         view_logs()
     elif args.clean:
         clean()
+    elif args.stop_all:
+        stop_all()
 
 
 if __name__ == '__main__':
