@@ -41,11 +41,11 @@ def watch_qstat():
 def view_logs():
     files = sorted(glob('logs/*'))
 
+    all_lines = []
     for f in files:
-        cmd = 'cat ' + f
-        os.system(cmd)
-    
-    print()
+        lines = open(f, 'rb').read().decode()
+        all_lines.append(lines)
+    print('\n\n'.join(all_lines))
 
 
 def stop_all():
