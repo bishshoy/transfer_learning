@@ -44,6 +44,8 @@ def view_logs():
     for f in files:
         cmd = 'cat ' + f
         os.system(cmd)
+    
+    print()
 
 
 def stop_all():
