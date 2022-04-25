@@ -27,4 +27,5 @@ def parse():
     parser.add_argument('--upscale-images', action='store_true')
     parser.add_argument('--check-hyp', action='store_true')
 
-    return parser.parse_args()
+    args, _ = parser.parse_known_args()
+    return args

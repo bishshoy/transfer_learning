@@ -1,46 +1,47 @@
 import numpy as np
 from datetime import datetime
 import yaml
-import time
+import argparse
 import subprocess
+import time
 
-from parsers import *
+from parsers import parse as script_parser
 
 
 def create_arg_sets(config):
     arg_sets = []
 
     def hparam_lr(lr):
-        args = parse()
+        script_args = script_parser()
 
         # Fixed params
-        # args.print_model
-        # args.epochs
-        # args.continuous
-        # args.num_workers
-        # args.mom
-        # args.wd
-        # args.validate
-        # args.upscale_images
-        # args.check_hyp
-        # args.root
+        # script_args.print_model
+        # script_args.epochs
+        # script_args.continuous
+        # script_args.num_workers
+        # script_args.mom
+        # script_args.wd
+        # script_args.validate
+        # script_args.upscale_images
+        # script_args.check_hyp
+        # script_args.root
 
         # Must be supplied
-        args.model = config['model']
-        args.dataset = config['dataset']
+        script_args.model = config['model']
+        script_args.dataset = config['dataset']
 
         # Set or use default
-        args.batch_size = config.get('batch_size', args.batch_size)
+        script_args.batch_size = config.get('batch_size', script_args.batch_size)
 
         # Boolean params
-        args.pretrained = config.get('pretrained', False)
-        args.freeze_conv = config.get('freeze_conv', False)
-        args.replace_fc = config.get('replace_fc', False)
+        script_args.pretrained = config.get('pretrained', False)
+        script_args.freeze_conv = config.get('freeze_conv', False)
+        script_args.replace_fc = config.get('replace_fc', False)
 
         # Hyperparameters to be searched
-        args.lr = lr
+        script_args.lr = lr
 
-        return args
+        return script_args
 
     for lr in np.float64(config['lr']):
         arg_sets.append(hparam_lr(lr))
@@ -48,39 +49,43 @@ def create_arg_sets(config):
     return arg_sets
 
 
-def create_launch_scripts(args):
+def create_launch_scripts(script_args, launch_args):
     time.sleep(1)
     script_id = datetime.now().strftime('%d-%b-%H-%M-%S')
 
     lines = []
-    lines += ['export SCRATCH=/scratch/ee/phd/eez168482 \n']
-    lines += ['export PATH=$SCRATCH/miniconda3/bin:$PATH \n']
+
+    if launch_args.hpc:
+        lines += ['export SCRATCH=/scratch/ee/phd/eez168482 \n']
+        lines += ['export PATH=$SCRATCH/miniconda3/bin:$PATH \n']
+
     lines += ['cd $HOME/transfer_learning \n']
 
     lines += ['unbuffer python experiment.py \\']
-    lines += ['--model ' + args.model + ' \\']
-    lines += ['--dataset ' + args.dataset + ' \\']
-    lines += ['--batch-size ' + str(args.batch_size) + ' \\']
+    lines += ['--model ' + script_args.model + ' \\']
+    lines += ['--dataset ' + script_args.dataset + ' \\']
+    lines += ['--batch-size ' + str(script_args.batch_size) + ' \\']
 
-    if args.pretrained:
+    if script_args.pretrained:
         lines += ['--pretrained \\']
 
-    if args.freeze_conv:
+    if script_args.freeze_conv:
         lines += ['--freeze-conv \\']
 
-    if args.replace_fc:
+    if script_args.replace_fc:
         lines += ['--replace-fc \\']
 
-    lines += ['--lr ' + str(args.lr) + ' \\']
+    lines += ['--lr ' + str(script_args.lr) + ' \\']
     lines += ['| tee logs/'+str(script_id)+'.txt \\']
     lines += ['\n\n']
 
+    script = '\n'.join(lines)
     file = open('.temp_launch.sh', 'w+')
-    file.writelines('\n'.join(lines))
+    file.writelines(script)
     file.close()
 
-    # print('\n'.join(lines))
-    return script_id
+    # print(script)
+    return script, script_id
 
 
 def create_job(launch_script, script_id):
@@ -99,7 +104,11 @@ def store_job_id(job_id, script_id):
     file.close()
 
 
-def main():
+def launch_local():
+    subprocess.Popen(['sh', '.temp_launch.sh'])
+
+
+def main(launch_args):
     file = open('config.yaml', 'r')
     config = yaml.safe_load(file)
 
@@ -107,15 +116,53 @@ def main():
     for conf in config.keys():
         jobs[conf] = create_arg_sets(config[conf])
 
-    print('JOB_ID\t\t\t SCRIPT_ID')
-    print('======\t\t\t =========')
+    if launch_args.hpc:
+        print('JOB_ID\t\t\t SCRIPT_ID')
+        print('======\t\t\t =========')
+
+    scripts = []
     for job in jobs.keys():
-        for args in jobs[job]:
-            script_id = create_launch_scripts(args)
-            job_id = create_job('.temp_launch.sh', script_id)
-            print(job_id, '\t\t', script_id)
-            store_job_id(job_id, script_id)
+        for script_args in jobs[job]:
+            script, script_id = create_launch_scripts(script_args, launch_args)
+
+            if launch_args.hpc:
+                job_id = create_job('.temp_launch.sh', script_id)
+                print(job_id, '\t\t', script_id)
+                store_job_id(job_id, script_id)
+
+            if launch_args.local:
+                scripts += [script]
+
+    if launch_args.local:
+        final_script = '\n\n'.join(scripts)
+        file = open('.temp_launch.sh', 'w+')
+        file.writelines(final_script)
+        file.close()
+
+        launch_local()
+
+
+def launch_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--hpc', action='store_true')
+    parser.add_argument('--local', action='store_true')
+
+    launch_args = parser.parse_args()
+
+    if launch_args.hpc and launch_args.local:
+        raise ValueError('--hpc and --local are mutually exclusive')
+
+    if not launch_args.local:
+        launch_args.hpc = True
+
+    if launch_args.hpc:
+        print('Creating jobs for: HPC')
+    if launch_args.local:
+        print('Creating jobs for: local machine')
+
+    return launch_args
 
 
 if __name__ == '__main__':
-    main()
+    launch_args = launch_parser()
+    main(launch_args)
