@@ -105,8 +105,8 @@ def main():
     for conf in config.keys():
         jobs[conf] = create_arg_sets(config[conf])
 
-    print('JOB_ID\t\t SCRIPT_ID')
-    print('======\t\t =========')
+    print('JOB_ID\t\t\t SCRIPT_ID')
+    print('======\t\t\t =========')
     for job in jobs.keys():
         for args in jobs[job]:
             script_id = create_launch_scripts(args)
