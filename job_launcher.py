@@ -1,6 +1,7 @@
 import numpy as np
-import random
+from datetime import datetime
 import yaml
+import time
 import subprocess
 
 from parsers import *
@@ -48,7 +49,8 @@ def create_arg_sets(config):
 
 
 def create_launch_scripts(args):
-    script_id = random.randint(1e5, 1e6)
+    time.sleep(1)
+    script_id = datetime.now().strftime('%d-%b-%H-%M-%S')
 
     lines = []
     lines += ['export SCRATCH=/scratch/ee/phd/eez168482 \n']
