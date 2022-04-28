@@ -4,3 +4,4 @@ datasets
 *.sh
 *.txt
 *.yaml
+qstat
