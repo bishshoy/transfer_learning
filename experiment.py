@@ -7,7 +7,6 @@ from icecream import ic
 from models import *
 from dataloaders import *
 from trainer import *
-from utils import *
 from parsers import *
 
 
@@ -18,12 +17,11 @@ def experiment(args):
     model = build_model(args)
     model.cuda()
 
-    train_loader, val_loader = get_dataloaders(args)  # Sets args.num_classes
+    train_loader, val_loader = dataloaders(args)  # This also sets args.num_classes
 
     if args.freeze_conv:
         freeze_conv_layers(model, args)
-    if args.replace_fc:
-        replace_fc_layer(model, args)
+    replace_fc_layer(model, args)
 
     if args.print_model:
         print(model)
@@ -47,16 +45,17 @@ def experiment(args):
         if _continuous == 1 or epoch == args.epochs - 1:
             validate(model, val_loader, best_acc)
             print()
-            if args.check_hyp:
-                return
             _continuous = args.continuous + 1
         _continuous -= 1
         scheduler.step()
 
-    return {
-        'train_loss': train_loss,
-        'best_acc': best_acc.compute(),
-    }
+    print('### model: {model}, dataset: {dataset}, lr: {lr}, best_acc: {best_acc:.2f}'
+          ''.format(
+              model=args.model,
+              dataset=args.dataset,
+              lr=args.lr,
+              best_acc=100*best_acc.compute(),
+          ))
 
 
 if __name__ == '__main__':

@@ -1,37 +1,24 @@
 # python -m debugpy --listen 5678 --wait-for-client experiment.py \
 
+# for i in 'cifar10' 'cifar100' 'stl10' 'caltech101' 'dtd' 'cars' 'aircraft'; do
 # for i in 5e-4 1e-3 5e-3 1e-2 5e-2 1e-1; do
 # echo "*** VALUE: $i ***"
 # done
 
 
+export MODEL='resnet18'
+# export MODEL='vgg16'
+# export MODEL='vgg16_bn'
+# export MODEL='densenet121'
+# export MODEL='inceptionv3'
+# export MODEL='mobilenetv2'
+
 python experiment.py \
---model vgg16_bn \
---epochs 200 \
+--model $MODEL \
+--pretrained \
+--epochs 1 \
 --batch-size 128 \
 --lr 1e-2 \
---replace-fc \
---dataset stl10 \
+--dataset dtd \
 
-
-# python experiment.py \
-# --model vgg16_bn \
-# --pretrained \
-# --epochs 200 \
-# --lr $i \
-# --cifar 100 \
-# --droot /cifar100 \
-# --freeze-conv \
-# --replace-fc \
-# --check-hyp \
-
-
-# python experiment.py \
-# --model vgg16_bn \
-# --pretrained \
-# --epochs 200 \
-# --lr 1e-2 \
-# --cifar 100 \
-# --droot /cifar100 \
-# --replace-fc \
 

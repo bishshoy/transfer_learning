@@ -2,8 +2,6 @@ from torchmetrics import MeanMetric, Accuracy
 import datetime
 import time
 
-from utils import *
-
 
 def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
     model.train()
@@ -44,7 +42,7 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
                     eta=str(datetime.timedelta(hours=eta)).rsplit(':', 1)[0],
                     acc=100 * acc.compute(),),
                 end='')
-    
+
     return avg_loss.compute()
 
 
