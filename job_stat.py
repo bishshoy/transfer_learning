@@ -1,7 +1,111 @@
 import argparse
 import subprocess
-from glob import glob
+import glob
 import os
+
+
+def fetch_job_ids():
+    job_ids = []
+
+    with open('.ids', 'r') as file:
+        lines = file.read().strip().split('\n')
+
+        for l in lines:
+            if l != '':
+                job_ids.append(l.strip().split(',')[0])
+
+    return job_ids
+
+
+def check_stat(job_id):
+    cmd = 'qstat ' + job_id
+
+    try:
+        message = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).strip().decode('utf-8')
+        return True, message
+    except subprocess.CalledProcessError as e:
+        return False, e.output.strip().decode('utf-8')
+
+
+def watch_stat():
+    outputs = []
+
+    for job_id in fetch_job_ids():
+        running, msg = check_stat(job_id)
+
+        if running:
+            out = msg
+        else:
+            out = 'Job id\n----------------\n'
+            out += job_id + '\t\t'
+            out += msg
+
+        outputs.append(out)
+        outputs.append('\n')
+
+    output = '\n'.join(outputs)
+    print(output)
+
+
+def view_logs():
+    files = sorted(glob.glob('logs/*'))
+
+    all_lines = []
+    for f in files:
+        with open(f, 'rb') as stream:
+            lines = stream.read().decode()
+        all_lines.append(lines)
+    print('\n\n'.join(all_lines))
+
+
+def stop_all():
+    for job_id in fetch_job_ids():
+        cmd = 'qdel '+job_id
+        print(cmd)
+
+        try:
+            os.system(cmd)
+        except:
+            pass
+
+        print()
+
+
+def clean():
+    with open('.ids', 'r') as file:
+        lines = file.read().strip().split('\n')
+
+    print()
+    print('All')
+    print('===')
+    print('\n'.join(lines))
+    print()
+
+    keep = []
+    outdated = []
+
+    for l in lines:
+        job_id = l.strip().split(',')[0]
+
+        running, msg = check_stat(job_id)
+
+        if running:
+            keep.append(l)
+        else:
+            outdated.append(l)
+
+    print('Outdated')
+    print('========')
+    print('\n'.join(outdated))
+    print()
+
+    print('Keep')
+    print('====')
+    print('\n'.join(keep))
+    print()
+
+    with open('.ids', 'w+') as file:
+        file.writelines('\n'.join(keep).strip())
 
 
 def parse():
@@ -16,105 +120,14 @@ def parse():
     return args
 
 
-def watch_qstat():
-    lines = open('.ids', 'r').read().strip().split('\n')
-
-    outputs = []
-    for l in lines:
-        job_id = l.strip().split(',')[0]
-        cmd = 'qstat ' + job_id
-
-        try:
-            out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).strip().decode('utf-8')
-        except subprocess.CalledProcessError as e:
-            out = 'Job id\n----------------\n'
-            out += job_id + '\t\t'
-            out += e.output.strip().decode('utf-8')
-
-        outputs.append(out)
-        outputs.append('\n')
-
-    output = '\n'.join(outputs)
-    print(output)
-
-
-def view_logs():
-    files = sorted(glob('logs/*'))
-
-    all_lines = []
-    for f in files:
-        lines = open(f, 'rb').read().decode()
-        all_lines.append(lines)
-    print('\n\n'.join(all_lines))
-
-
-def stop_all():
-    lines = open('.ids', 'r').read().strip().split('\n')
-
-    for l in lines:
-        job_id = l.strip().split(',')[0]
-
-        cmd = 'qdel '+job_id
-        print(cmd)
-
-        try:
-            os.system(cmd)
-        except:
-            pass
-
-        print()
-
-
-def clean():
-    file = open('.ids', 'r').read()
-    lines = file.strip().split('\n')
-
-    print()
-    print('All')
-    print('===')
-    print(file)
-    print()
-
-    keep = []
-    outdated = []
-
-    for l in lines:
-        job_id = l.strip().split(',')[0]
-        cmd = 'qstat ' + job_id
-
-        try:
-            subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-            keep.append(l)
-        except subprocess.CalledProcessError:
-            outdated.append(l)
-
-    print('Outdated')
-    print('========')
-    print('\n'.join(outdated))
-    print()
-
-    print('Keep')
-    print('====')
-    print('\n'.join(keep))
-    print()
-
-    file = open('.ids', 'w+')
-    file.writelines('\n'.join(keep)+'\n')
-    file.close()
-
-
-def main(args):
+if __name__ == '__main__':
+    args = parse()
 
     if args.watch:
-        watch_qstat()
+        watch_stat()
     elif args.logs:
         view_logs()
     elif args.clean:
         clean()
     elif args.stop_all:
         stop_all()
-
-
-if __name__ == '__main__':
-    args = parse()
-    main(args)
