@@ -1,6 +1,7 @@
 import argparse
 import time
 import os
+import sys
 
 from job_stat import check_stat, fetch_job_ids
 
@@ -14,12 +15,9 @@ def process(args):
         if running:
             total_running += 1
 
-    print('\ntotal jobs running:', total_running)
+    if total_running < args.queue_max:
+        print('\ntotal jobs running:', total_running)
 
-    if total_running == args.queue_max:
-        print('queue full\n\n')
-
-    else:
         to_launch = max(args.queue_max - total_running, 0)
         print('launching', to_launch, 'jobs')
 
@@ -31,6 +29,10 @@ def process(args):
         os.system(cmd)
         print()
 
+    else:
+        sys.stdout.write('.')
+        sys.stdout.flush()
+
 
 def main(args):
     print('check interval', str(args.check_interval))
@@ -38,12 +40,7 @@ def main(args):
 
     while True:
         process(args)
-
-        for i in range(args.check_interval-1, -1, -1):
-            print('\rperforming next check in', i, 'seconds', end='    ')
-            time.sleep(1)
-
-        print()
+        time.sleep(args.check_interval)
 
 
 def parse():
