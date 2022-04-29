@@ -16,7 +16,7 @@ def save_checkpoint(model, args):
     filename = [args.model, args.dataset, str(args.lr), mode]
     filename = '-'.join(filename) + '.ckpt'
 
-    print('Saved')
+    print('Saved', end='')
     torch.save(model.state_dict(), path + filename)
 
 
