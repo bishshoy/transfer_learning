@@ -62,7 +62,7 @@ def create_launch_scripts(script_args, launch_args):
         lines += ['--freeze-conv \\']
 
     lines += ['--lr ' + str(script_args.lr) + ' \\']
-    lines += ['| tee logs/'+str(script_id)+'.txt \\']
+    lines += ['| tee logs/' + str(script_id) + '.txt \\']
     lines += ['\n\n']
 
     script = '\n'.join(lines)
@@ -75,8 +75,8 @@ def create_launch_scripts(script_args, launch_args):
 
 def submit_job(script_id, launch_args):
     cmd = 'qsub -P ee -o /dev/null -e /dev/null -lselect=1:ncpus=1:ngpus=1:centos=skylake'
-    cmd += ' -N '+str(script_id)
-    cmd += ' '+'.temp_launch.sh'
+    cmd += ' -N ' + str(script_id)
+    cmd += ' ' + '.temp_launch.sh'
 
     if launch_args.debug:
         print('debug:', cmd)
@@ -94,11 +94,11 @@ def store_job_id(job_id, script_id, script_args):
         script_args.dataset,
         'pretrained' if script_args.pretrained else '',
         'freeze_conv' if script_args.freeze_conv else '',
-        'lr='+str(script_args.lr),
+        'lr=' + str(script_args.lr),
     ]
 
     with open('.ids', 'a+') as file:
-        file.writelines(','.join(lines)+'\n')
+        file.writelines(','.join(lines) + '\n')
 
 
 def launch_jobs(launch_args):
@@ -132,7 +132,7 @@ def launch_jobs(launch_args):
         else:
             _, script_id = create_launch_scripts(script_args[next_launch], launch_args)
             job_id = submit_job(script_id, launch_args)
-            config['job'+str(next_launch)]['launched'] = True
+            config['job' + str(next_launch)]['launched'] = True
 
             print(job_id, '\t\t', script_id)
             store_job_id(job_id, script_id, script_args[j])

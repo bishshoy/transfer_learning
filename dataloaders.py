@@ -43,77 +43,71 @@ def dataloaders(args):
         args.num_classes = 102
         train_dataset, val_dataset = aircraft(args)
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
-                              shuffle=True, num_workers=args.num_workers, pin_memory=True)
+    train_loader = DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True
+    )
 
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size,
-                            shuffle=False, num_workers=args.num_workers, pin_memory=True)
+    val_loader = DataLoader(
+        val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, pin_memory=True
+    )
 
     return train_loader, val_loader
 
 
 def imagenet_normalizer():
-    return transforms.Normalize((0.485, 0.456, 0.406),
-                                (0.229, 0.224, 0.225))
+    return transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 
 
 def train_transform():
-    train_transform = transforms.Compose([
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomResizedCrop(224),
-        transforms.ToTensor(),
-        imagenet_normalizer()
-    ])
+    train_transform = transforms.Compose(
+        [
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomResizedCrop(224),
+            transforms.ToTensor(),
+            imagenet_normalizer(),
+        ]
+    )
 
     return train_transform
 
 
 def val_transform():
-    val_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        imagenet_normalizer(),
-    ])
+    val_transform = transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            imagenet_normalizer(),
+        ]
+    )
 
     return val_transform
 
 
 def imagenet(args):
-    train_dataset = datasets.ImageNet(args.root, split='train',
-                                      transform=train_transform())
-    val_dataset = datasets.ImageNet(args.root, split='val',
-                                    transform=val_transform())
+    train_dataset = datasets.ImageNet(args.root, split='train', transform=train_transform())
+    val_dataset = datasets.ImageNet(args.root, split='val', transform=val_transform())
 
     return train_dataset, val_dataset
 
 
 def cifar10(args):
-    train_dataset = datasets.CIFAR10(args.root, train=True,
-                                     transform=train_transform(), download=True)
-
-    val_dataset = datasets.CIFAR10(args.root, train=False,
-                                   transform=val_transform(), download=True)
+    train_dataset = datasets.CIFAR10(args.root, train=True, transform=train_transform(), download=True)
+    val_dataset = datasets.CIFAR10(args.root, train=False, transform=val_transform(), download=True)
 
     return train_dataset, val_dataset
 
 
 def cifar100(args):
-    train_dataset = datasets.CIFAR100(args.root, train=True,
-                                      transform=train_transform(), download=True)
-
-    val_dataset = datasets.CIFAR100(args.root, train=False,
-                                    transform=val_transform(), download=True)
+    train_dataset = datasets.CIFAR100(args.root, train=True, transform=train_transform(), download=True)
+    val_dataset = datasets.CIFAR100(args.root, train=False, transform=val_transform(), download=True)
 
     return train_dataset, val_dataset
 
 
 def stl10(args):
-    train_dataset = datasets.STL10(args.root, split='train',
-                                   transform=train_transform(), download=True)
-
-    val_dataset = datasets.STL10(args.root, split='test',
-                                 transform=val_transform(), download=True)
+    train_dataset = datasets.STL10(args.root, split='train', transform=train_transform(), download=True)
+    val_dataset = datasets.STL10(args.root, split='test', transform=val_transform(), download=True)
 
     return train_dataset, val_dataset
 
@@ -121,11 +115,11 @@ def stl10(args):
 def caltech101(args):
     class Caltech101(Dataset):
         def __init__(self):
-            folders = glob.glob(args.root+'/caltech101/*')
+            folders = glob.glob(args.root + '/caltech101/*')
 
             self.files = []
             for class_idx, folder in enumerate(folders):
-                files = glob.glob(folder+'/*.jpg')
+                files = glob.glob(folder + '/*.jpg')
                 # print(len(files))
 
                 for file in files:
@@ -147,7 +141,7 @@ def caltech101(args):
             # Resize and Crop
             image = image.resize((240, 240))
             x, y = np.random.randint(0, 16, 2)
-            image = image.crop((x, y, x+224, y+224))
+            image = image.crop((x, y, x + 224, y + 224))
 
             # To tensor
             image = np.asarray(image)
@@ -158,7 +152,7 @@ def caltech101(args):
 
             # Normalize
             mean, stdev = torch.asarray([[[0.485, 0.456, 0.406]]]), torch.asarray([[[0.229, 0.224, 0.225]]])
-            image = (image/255 - mean) / stdev
+            image = (image / 255 - mean) / stdev
 
             # Permute
             image = image.permute(2, 0, 1)
@@ -175,11 +169,8 @@ def caltech101(args):
 
 
 def dtd(args):
-    train_dataset = datasets.DTD(args.root, split='train',
-                                 transform=train_transform(), download=True)
-
-    val_dataset = datasets.DTD(args.root, split='test',
-                               transform=val_transform(), download=True)
+    train_dataset = datasets.DTD(args.root, split='train', transform=train_transform(), download=True)
+    val_dataset = datasets.DTD(args.root, split='test', transform=val_transform(), download=True)
 
     return train_dataset, val_dataset
 
@@ -187,11 +178,11 @@ def dtd(args):
 def sun(args):
     class SUN397(Dataset):
         def __init__(self):
-            folders = glob.glob(args.root+'/SUN397/*')
+            folders = glob.glob(args.root + '/SUN397/*')
 
             self.files = []
             for class_idx, folder in enumerate(folders):
-                files = glob.glob(folder+'/*/*.jpg')
+                files = glob.glob(folder + '/*/*.jpg')
                 # print(len(files))
 
                 for file in files:
@@ -213,7 +204,7 @@ def sun(args):
             # Resize and Crop
             image = image.resize((240, 240))
             x, y = np.random.randint(0, 16, 2)
-            image = image.crop((x, y, x+224, y+224))
+            image = image.crop((x, y, x + 224, y + 224))
 
             # To tensor
             image = np.asarray(image)
@@ -226,7 +217,7 @@ def sun(args):
 
             # Normalize
             mean, stdev = torch.asarray([[[0.485, 0.456, 0.406]]]), torch.asarray([[[0.229, 0.224, 0.225]]])
-            image = (image/255 - mean) / stdev
+            image = (image / 255 - mean) / stdev
 
             # Permute
             image = image.permute(2, 0, 1)
@@ -243,20 +234,14 @@ def sun(args):
 
 
 def cars(args):
-    train_dataset = datasets.StanfordCars(args.root, split='train',
-                                          transform=train_transform(), download=True)
-
-    val_dataset = datasets.StanfordCars(args.root, split='test',
-                                        transform=val_transform(), download=True)
+    train_dataset = datasets.StanfordCars(args.root, split='train', transform=train_transform(), download=True)
+    val_dataset = datasets.StanfordCars(args.root, split='test', transform=val_transform(), download=True)
 
     return train_dataset, val_dataset
 
 
 def aircraft(args):
-    train_dataset = datasets.FGVCAircraft(args.root, split='train',
-                                          transform=train_transform(), download=True)
-
-    val_dataset = datasets.FGVCAircraft(args.root, split='test',
-                                        transform=val_transform(), download=True)
+    train_dataset = datasets.FGVCAircraft(args.root, split='train', transform=train_transform(), download=True)
+    val_dataset = datasets.FGVCAircraft(args.root, split='test', transform=val_transform(), download=True)
 
     return train_dataset, val_dataset

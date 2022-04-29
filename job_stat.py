@@ -60,7 +60,7 @@ def view_logs():
 
 def stop_all():
     for job_id in fetch_job_ids():
-        cmd = 'qdel '+job_id
+        cmd = 'qdel ' + job_id
         print(cmd)
 
         try:

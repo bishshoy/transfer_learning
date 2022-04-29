@@ -32,7 +32,7 @@ def update_config(new_configs, overwrite):
 
     for conf in new_configs:
         last_job += 1
-        curr_config['job'+str(last_job)] = conf
+        curr_config['job' + str(last_job)] = conf
 
     with open('config.yaml', 'w+') as stream:
         yaml.safe_dump(curr_config, stream, sort_keys=False)

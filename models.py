@@ -25,32 +25,34 @@ def freeze_conv_layers(model, args):
         param.requires_grad = False
 
     for name in ['vgg', 'densenet', 'mobilenet']:
-        if args.model[:len(name)] == name:
+        if args.model[: len(name)] == name:
             for param in model.classifier.parameters():
                 param.requires_grad = True
 
     for name in ['resnet', 'inception']:
-        if args.model[:len(name)] == name:
+        if args.model[: len(name)] == name:
             for param in model.fc.parameters():
                 param.required_grad = True
 
 
 def replace_fc_layer(model, args):
     for name in ['vgg', 'densenet', 'mobilenet']:
-        if args.model[:len(name)] == name:
+        if args.model[: len(name)] == name:
             if name == 'vgg':
-                model.classifier[6] = nn.Linear(in_features=model.classifier[6].in_features,
-                                                out_features=args.num_classes, bias=True)
+                model.classifier[6] = nn.Linear(
+                    in_features=model.classifier[6].in_features, out_features=args.num_classes, bias=True
+                )
             elif name == 'densenet':
-                model.classifier = nn.Linear(in_features=model.classifier.in_features,
-                                             out_features=args.num_classes, bias=True)
+                model.classifier = nn.Linear(
+                    in_features=model.classifier.in_features, out_features=args.num_classes, bias=True
+                )
             if name == 'mobilenet':
-                model.classifier[1] = nn.Linear(in_features=model.classifier[1].in_features,
-                                                out_features=args.num_classes, bias=True)
+                model.classifier[1] = nn.Linear(
+                    in_features=model.classifier[1].in_features, out_features=args.num_classes, bias=True
+                )
 
     for name in ['resnet', 'inception']:
-        if args.model[:len(name)] == name:
-            model.fc = nn.Linear(in_features=model.fc.in_features,
-                                 out_features=args.num_classes, bias=True)
+        if args.model[: len(name)] == name:
+            model.fc = nn.Linear(in_features=model.fc.in_features, out_features=args.num_classes, bias=True)
 
     model.to('cuda')
