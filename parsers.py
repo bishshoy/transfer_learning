@@ -18,6 +18,7 @@ def parse():
     parser.add_argument('--dataset', type=str, default='')
     parser.add_argument('--root', type=str, default='datasets')
 
+    parser.add_argument('--resume', type=str, default=None)
     parser.add_argument('--validate', action='store_true')
 
     # Transfer Learning args
