@@ -96,9 +96,15 @@ def store_job_id(job_id, script_id, script_args):
         'freeze_conv' if script_args.freeze_conv else '',
         'lr=' + str(script_args.lr),
     ]
+    lines = [','.join(lines)]
 
-    with open('.ids', 'a+') as file:
-        file.writelines(','.join(lines) + '\n')
+    with open('.ids', 'r') as file:
+        existing_ids = file.read().strip().split('\n')
+
+    lines = existing_ids + lines
+
+    with open('.ids', 'w+') as file:
+        file.writelines('\n'.join(lines))
 
 
 def launch_jobs(launch_args):

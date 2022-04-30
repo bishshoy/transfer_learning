@@ -1,6 +1,7 @@
+import glob
+import random
 import argparse
 import subprocess
-import glob
 import os
 
 
@@ -17,7 +18,10 @@ def fetch_job_ids():
     return job_ids
 
 
-def check_stat(job_id):
+def check_stat(job_id, args):
+    if args.debug:
+        return random.randint(0, 1), ''
+
     cmd = 'qstat ' + job_id
 
     try:
@@ -116,6 +120,8 @@ def parse():
     parser.add_argument('--logs', action='store_true')
     parser.add_argument('--clean', action='store_true')
     parser.add_argument('--stop-all', action='store_true')
+
+    parser.add_argument('--debug', action='store_true')
 
     args = parser.parse_args()
     return args
