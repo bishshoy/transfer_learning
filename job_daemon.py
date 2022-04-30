@@ -10,7 +10,7 @@ def process(args):
     total_running = 0
 
     for job_id in fetch_job_ids():
-        running, _ = check_stat(job_id)
+        running, _ = check_stat(job_id, args.debug)
 
         if running:
             total_running += 1
