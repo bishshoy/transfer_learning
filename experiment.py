@@ -36,9 +36,9 @@ def experiment(args):
 
     if args.resume:
         restore_checkpoint(model, args)
-    
+
     best_acc = MaxMetric()
-    
+
     if args.validate:
         validate(model, val_loader, best_acc)
         return
@@ -62,11 +62,12 @@ def experiment(args):
         scheduler.step()
 
     print(
-        '### model: {model}, dataset: {dataset}, lr: {lr}, best_acc: {best_acc:.2f}'
+        '### model: {model}, dataset: {dataset}, lr: {lr}, mode: {mode}, best_acc: {best_acc:.2f}'
         ''.format(
             model=args.model,
             dataset=args.dataset,
             lr=args.lr,
+            mode=mode_value(args),
             best_acc=100 * best_acc.compute(),
         )
     )

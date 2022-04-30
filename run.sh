@@ -21,15 +21,3 @@ python experiment.py \
 --lr 1e-2 \
 --dataset dtd \
 
-
-python experiment.py \
---model $MODEL \
---pretrained \
---epochs 1 \
---batch-size 128 \
---lr 1e-2 \
---dataset dtd \
---resume checkpoints/resnet18-dtd-0.01-2.ckpt \
---validate \
-
-
