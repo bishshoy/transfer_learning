@@ -1,4 +1,5 @@
 import argparse
+import os
 
 
 def parse():
@@ -9,7 +10,7 @@ def parse():
     parser.add_argument('--batch-size', type=int, default=256)
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--continuous', type=int, default=1)
-    parser.add_argument('--num-workers', type=int, default=4)
+    parser.add_argument('--num-workers', type=int, default=os.cpu_count())
 
     parser.add_argument('--lr', type=float, default=1e-2)
     parser.add_argument('--mom', type=float, default=0.9)
