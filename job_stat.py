@@ -52,6 +52,7 @@ def view_logs():
 
     all_lines = []
     for f in files:
+        all_lines.append('filename: ' + f)
         with open(f, 'rb') as stream:
             lines = stream.read().decode()
         all_lines.append(lines)
