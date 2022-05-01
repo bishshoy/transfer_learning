@@ -1,4 +1,5 @@
 import glob
+from datetime import datetime
 import random
 import argparse
 import subprocess
@@ -52,7 +53,9 @@ def watch_stat():
 
 
 def view_logs():
-    files = sorted(glob.glob('logs/*'))
+    files = glob.glob('logs/*')
+    files = sorted([datetime.strptime(x[5:-4], '%d-%b-%H-%M-%S') for x in files])
+    files = ['logs/' + x.strftime('%d-%b-%H-%M-%S') + '.txt' for x in files]
 
     all_lines = []
     for f in files:
