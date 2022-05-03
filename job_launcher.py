@@ -51,6 +51,7 @@ def create_launch_scripts(script_args, launch_args):
     lines += ['cd $HOME/transfer_learning \n']
 
     lines += ['unbuffer python experiment.py \\']
+    lines += ['--num-workers ' + str(script_args.num_workers) + ' \\']
     lines += ['--model ' + script_args.model + ' \\']
     lines += ['--dataset ' + script_args.dataset + ' \\']
     lines += ['--batch-size ' + str(script_args.batch_size) + ' \\']
