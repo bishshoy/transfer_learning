@@ -1,9 +1,10 @@
+from torch.cuda.amp import autocast
 from torchmetrics import MeanMetric, Accuracy
 import datetime
 import time
 
 
-def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
+def train_one_epoch(model, loss_fn, optim, scaler, train_loader, epoch, args):
     model.train()
 
     avg_loss = MeanMetric()
@@ -15,12 +16,14 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
 
         data, target = data.cuda(), target.cuda()
 
-        optim.zero_grad()
+        with autocast(enabled=args.amp):
+            output = model(data)
+            loss = loss_fn(output, target)
+        scaler.scale(loss).backward()
+        scaler.step(optim)
+        scaler.update()
 
-        output = model(data)
-        loss = loss_fn(output, target)
-        loss.backward()
-        optim.step()
+        optim.zero_grad(set_to_none=True)
 
         avg_loss(loss.item())
         acc(output.cpu(), target.cpu())
@@ -30,7 +33,7 @@ def train_one_epoch(model, loss_fn, optim, train_loader, epoch, total_epochs):
         if i != 0:
             if i != len(train_loader) - 1:
                 ips(len(data) / (toc - tic))
-                eta = (total_epochs - epoch) * len(train_loader) * len(data) / ips.compute().item() / 3600.0
+                eta = (args.epochs - epoch) * len(train_loader) * len(data) / ips.compute().item() / 3600.0
 
             print(
                 '\r[ {epoch:3}: {iter_a:3}/ {iter_b:3}]  LR:{lr:7.4f}  Loss:{loss:6.3f}  IPS:{ips:5.0f}  ETA: {eta}  Acc:{acc:6.2f}'

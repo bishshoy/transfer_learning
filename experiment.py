@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import numpy as np
+from torch.cuda.amp import GradScaler
 
 from torchmetrics import MaxMetric
 from icecream import ic
@@ -30,8 +30,9 @@ def experiment(args):
         exit()
 
     model = nn.DataParallel(model.cuda())
-    optim = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom, weight_decay=args.wd, nesterov=True)
     loss_fn = nn.CrossEntropyLoss()
+    optim = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom, weight_decay=args.wd, nesterov=True)
+    scaler = GradScaler(enabled=args.amp)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args.epochs)
 
     if args.resume:
@@ -46,7 +47,7 @@ def experiment(args):
     _continuous = args.continuous
 
     for epoch in range(args.epochs):
-        train_one_epoch(model, loss_fn, optim, train_loader, epoch, args.epochs)
+        train_one_epoch(model, loss_fn, optim, scaler, train_loader, epoch, args)
 
         if _continuous == 1 or epoch == args.epochs - 1:
             val_metrics = validate(model, val_loader, best_acc)

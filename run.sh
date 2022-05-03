@@ -6,21 +6,16 @@
 # done
 
 
-export MODEL='mnasnet'
-# export MODEL='vgg16'
-# export MODEL='vgg16_bn'
-# export MODEL='densenet121'
-# export MODEL='inceptionv3'
-# export MODEL='mobilenetv2'
+export MODEL='vgg16_bn'
+export DATASET='cifar100'
 
-python experiment.py \
+
+CUDA_VISIBLE_DEVICES=0 python experiment.py \
 --model $MODEL \
---pretrained \
---epochs 1 \
---batch-size 128 \
+--epochs 100 \
+--batch-size 256 \
 --lr 1e-2 \
---dataset dtd \
---freeze-conv \
+--dataset $DATASET \
+--root /datasets \
 --replace-fc \
---print-model \
-
+--amp \

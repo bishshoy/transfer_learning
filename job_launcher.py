@@ -18,6 +18,7 @@ def create_script_args(config, launch_args):
     # script_args.wd
     # script_args.validate
     # script_args.root
+    # script_args.amp
 
     # For HPC, num_workers=1
     script_args.num_workers = 1
@@ -51,6 +52,7 @@ def create_launch_scripts(script_args, launch_args):
     lines += ['cd $HOME/transfer_learning \n']
 
     lines += ['unbuffer python experiment.py \\']
+    lines += ['--amp \\']
     lines += ['--num-workers ' + str(script_args.num_workers) + ' \\']
     lines += ['--model ' + script_args.model + ' \\']
     lines += ['--dataset ' + script_args.dataset + ' \\']
