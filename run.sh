@@ -6,7 +6,7 @@
 # done
 
 
-export MODEL='resnet18'
+export MODEL='mnasnet'
 # export MODEL='vgg16'
 # export MODEL='vgg16_bn'
 # export MODEL='densenet121'
@@ -20,4 +20,7 @@ python experiment.py \
 --batch-size 128 \
 --lr 1e-2 \
 --dataset dtd \
+--freeze-conv \
+--replace-fc \
+--print-model \
 
