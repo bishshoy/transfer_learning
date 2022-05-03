@@ -46,7 +46,7 @@ def create_launch_scripts(script_args, launch_args):
 
     lines = []
 
-    lines += ['export SCRATCH=/scratch/ee/phd/eez168482 \n']
+    lines += ['export SCRATCH=$HOME/scratch \n']
     lines += ['export PATH=$SCRATCH/miniconda3/bin:$PATH \n']
 
     lines += ['cd $HOME/transfer_learning \n']
