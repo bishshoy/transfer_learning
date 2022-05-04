@@ -1,3 +1,4 @@
+import torch
 from torch.cuda.amp import autocast
 from torchmetrics import MeanMetric, Accuracy
 import datetime
@@ -56,7 +57,7 @@ def train_one_epoch(model, loss_fn, optim, scaler, train_loader, epoch, args):
     }
 
 
-def validate(model, val_loader, best_acc):
+def validate(model, val_loader, best_acc, args):
     model.eval()
 
     acc = Accuracy()
@@ -64,7 +65,9 @@ def validate(model, val_loader, best_acc):
     for data, target in val_loader:
         data, target = data.cuda(), target.cuda()
 
-        output = model(data)
+        with torch.no_grad():
+            with autocast():
+                output = model(data)
         acc(output.cpu(), target.cpu())
 
     best_acc(acc.compute())

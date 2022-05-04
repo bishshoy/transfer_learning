@@ -10,7 +10,7 @@ export MODEL='vgg16_bn'
 export DATASET='cifar100'
 
 
-CUDA_VISIBLE_DEVICES=0 python experiment.py \
+python experiment.py \
 --model $MODEL \
 --epochs 100 \
 --batch-size 256 \

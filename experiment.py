@@ -41,7 +41,7 @@ def experiment(args):
     best_acc = MaxMetric()
 
     if args.validate:
-        validate(model, val_loader, best_acc)
+        validate(model, val_loader, best_acc, args)
         return
 
     _continuous = args.continuous
@@ -50,7 +50,7 @@ def experiment(args):
         train_one_epoch(model, loss_fn, optim, scaler, train_loader, epoch, args)
 
         if _continuous == 1 or epoch == args.epochs - 1:
-            val_metrics = validate(model, val_loader, best_acc)
+            val_metrics = validate(model, val_loader, best_acc, args)
 
             # Save checkpoint based on best_acc
             if val_metrics['val_acc'] >= val_metrics['best_acc']:
