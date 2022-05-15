@@ -53,10 +53,12 @@ def watch_stat():
     print(output)
 
 
-def view_logs(nice):
-    files = glob.glob('logs/*')
-    files = sorted([datetime.strptime(x[5:-4], '%d-%b-%H-%M-%S') for x in files])
-    files = ['logs/' + x.strftime('%d-%b-%H-%M-%S') + '.txt' for x in files]
+def view_logs(dir, nice):
+    files = glob.glob(dir + '/*')
+    files = sorted([datetime.strptime(x.strip().split('/')[-1].split('.')[0], '%d-%b-%H-%M-%S') for x in files])
+    files = [dir + '/' + x.strftime('%d-%b-%H-%M-%S') + '.txt' for x in files]
+
+    print('found', len(files), 'logs')
 
     all_lines = []
     for f in files:
@@ -65,34 +67,33 @@ def view_logs(nice):
             lines = stream.read().decode()
         all_lines.append(lines)
     all_lines = '\n\n'.join(all_lines)
-    
+
     if not nice:
         print(all_lines)
     else:
         all_lines = all_lines.replace('\r', '\n')
         all_lines = all_lines.split('\n')
-        
+
         models, datasets = [], []
         table = OrderedDict()
-        
+
         for l in all_lines:
             if '###' in l:
                 iden = l.strip().split(', ')
-                model = iden[0][len('### model: '):]
-                dataset = iden[1][len('dataset: '):]
-                mode = iden[3][len('mode: '):]
-                acc = float(iden[4][len('best_acc: '):])
-                
+                model = iden[0][len('### model: ') :]
+                dataset = iden[1][len('dataset: ') :]
+                mode = iden[3][len('mode: ') :]
+                acc = float(iden[4][len('best_acc: ') :])
+
                 if model not in models:
                     models.append(model)
-                
+
                 if dataset not in datasets:
                     datasets.append(dataset)
-                
+
                 key = model + '_' + dataset + '_' + mode
                 table[key] = max(acc, table.get(key, 0))
-        
-        
+
         for model in models:
             for dataset in datasets:
                 print('|', end=' ')
@@ -100,7 +101,7 @@ def view_logs(nice):
                 print('|', end=' ')
                 print(dataset, end=' ')
                 print('|', end=' ')
-                
+
                 for i in range(3):
                     print('{:.2f}'.format(table[model + '_' + dataset + '_' + str(i)]), end=' ')
                     print('|', end=' ')
@@ -163,6 +164,7 @@ def parse():
     parser.add_argument('--watch', action='store_true')
     parser.add_argument('--logs', action='store_true')
     parser.add_argument('--nice', action='store_true')
+    parser.add_argument('--dir', type=str, default='logs')
     parser.add_argument('--clean', action='store_true')
     parser.add_argument('--stop-all', action='store_true')
 
@@ -176,7 +178,7 @@ if __name__ == '__main__':
     if args.watch:
         watch_stat()
     elif args.logs:
-        view_logs(args.nice)
+        view_logs(args.dir, args.nice)
     elif args.clean:
         clean()
     elif args.stop_all:
