@@ -103,9 +103,13 @@ def view_logs(dir, nice):
                 print('|', end=' ')
 
                 for i in range(3):
-                    print('{:.2f}'.format(table[model + '_' + dataset + '_' + str(i)]), end=' ')
+                    try:
+                        print('{:.2f}'.format(table[model + '_' + dataset + '_' + str(i)]), end=' ')
+                    except:
+                        print('', end=' ')
                     print('|', end=' ')
                 print()
+            print('|\t' * 6)
 
 
 def stop_all():
