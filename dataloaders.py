@@ -144,7 +144,7 @@ def caltech101(args):
             image = image.crop((x, y, x + 224, y + 224))
 
             # To tensor
-            image = np.asarray(image)
+            image = np.array(image)
             image = torch.from_numpy(image)
 
             if len(image.shape) == 2:
@@ -207,7 +207,7 @@ def sun(args):
             image = image.crop((x, y, x + 224, y + 224))
 
             # To tensor
-            image = np.asarray(image)
+            image = np.array(image)
             image = torch.from_numpy(image)
 
             if len(image.shape) == 2:
