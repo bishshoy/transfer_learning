@@ -53,12 +53,13 @@ def watch_stat():
     print(output)
 
 
-def view_logs(dir, nice):
+def view_logs(dir, nice, stats):
     files = glob.glob(dir + '/*')
     files = sorted([datetime.strptime(x.strip().split('/')[-1].split('.')[0], '%d-%b-%H-%M-%S') for x in files])
     files = [dir + '/' + x.strftime('%d-%b-%H-%M-%S') + '.txt' for x in files]
 
-    print('found', len(files), 'logs')
+    num_logs = len(files)
+    print('found', num_logs, 'logs')
 
     all_lines = []
     for f in files:
@@ -76,9 +77,15 @@ def view_logs(dir, nice):
 
         models, datasets = [], []
         table = OrderedDict()
+        total_completed = 0
+        dnf = []
 
         for l in all_lines:
+            if 'filename' in l:
+                dnf.append(l)
+
             if '###' in l:
+                del dnf[-1]
                 iden = l.strip().split(', ')
                 model = iden[0][len('### model: ') :]
                 dataset = iden[1][len('dataset: ') :]
@@ -92,7 +99,12 @@ def view_logs(dir, nice):
                     datasets.append(dataset)
 
                 key = model + '_' + dataset + '_' + mode
-                table[key] = max(acc, table.get(key, 0))
+
+                if not stats:
+                    table[key] = max(acc, table.get(key, 0))
+                else:
+                    table[key] = 1 + table.get(key, 0)
+                    total_completed += 1
 
         for model in models:
             for dataset in datasets:
@@ -110,6 +122,14 @@ def view_logs(dir, nice):
                     print('|', end=' ')
                 print()
             print('|\t' * 6)
+
+        if stats:
+            print('completed:', total_completed)
+            print('missing:', num_logs - total_completed)
+            if len(dnf):
+                print('did not finish:--')
+                print('-----------------')
+                print('\n'.join(dnf))
 
 
 def stop_all():
@@ -168,6 +188,7 @@ def parse():
     parser.add_argument('--watch', action='store_true')
     parser.add_argument('--logs', action='store_true')
     parser.add_argument('--nice', action='store_true')
+    parser.add_argument('--stats', action='store_true')
     parser.add_argument('--dir', type=str, default='logs')
     parser.add_argument('--clean', action='store_true')
     parser.add_argument('--stop-all', action='store_true')
@@ -182,7 +203,7 @@ if __name__ == '__main__':
     if args.watch:
         watch_stat()
     elif args.logs:
-        view_logs(args.dir, args.nice)
+        view_logs(args.dir, args.nice, args.stats)
     elif args.clean:
         clean()
     elif args.stop_all:
